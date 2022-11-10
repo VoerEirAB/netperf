@@ -318,7 +318,7 @@ double result_confid_pct = -1.0;
 double loc_cpu_confid_pct = -1.0;
 double rem_cpu_confid_pct = -1.0;
 double interval_pct = -1.0;
-
+int want_raw_data = 0;
 int protocol;
 int direction;
 int remote_send_size = -1;
@@ -4879,6 +4879,42 @@ send_omni_inner(char remote_host[], unsigned int legacy_caller, char header_str[
 		   &max_latency,
 		   &mean_latency,
 		   &stddev_latency);
+    if (want_raw_data){
+      printf("\nUnit usec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->unit_usec[i]);
+      }
+      printf("\nTen usec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->ten_usec[i]);
+      }
+      printf("\nHundred usec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->hundred_usec[i]);
+      }
+      printf("\nUnit msec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->unit_msec[i]);
+      }
+      printf("\nTen msec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->ten_msec[i]);
+      }
+      printf("\nHundred msec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->hundred_msec[i]);
+      }
+      printf("\nUnit sec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->unit_sec[i]);
+      }
+      printf("\nTen sec ");
+      for(int i = 0; i < HIST_NUM_OF_BUCKET; i++){
+        printf("%d ", time_hist->ten_sec[i]);
+      }
+
+      printf("\nTotal sum %d\n", time_hist->total);
+    }
     p50_latency = HIST_get_percentile(time_hist, 0.50);
     p90_latency = HIST_get_percentile(time_hist, 0.90);
     p99_latency = HIST_get_percentile(time_hist, 0.99);
@@ -6918,6 +6954,7 @@ OMNI and Migrated BSD Sockets Test Options:\n\
                       of 0x2 for transmit and 0x4 for receive. Default:\n\
                       based on test type\n\
     -D [L][,R]        Set TCP_NODELAY locally and/or remotely (TCP_*)\n\
+    -E                Print raw data showing latency distribution\n\
     -h                Display this text\n\
     -H name[/mask],fam  Use name (or IP) and family as target of data connection\n\
                       A mask value will cause randomization of the IP used\n\
@@ -6973,7 +7010,7 @@ scan_omni_args(int argc, char *argv[])
 
 {
 
-#define OMNI_ARGS "aBb:cCd:De:FgG:hH:i:Ij:kK:l:L:m:M:nNoOp:P:r:R:s:S:t:T:u:UVw:W:46"
+#define OMNI_ARGS "aBb:cCd:De:E:FgG:hH:i:Ij:kK:l:L:m:M:nNoOp:P:r:R:s:S:t:T:u:UVw:W:46"
 
   extern char	*optarg;	  /* pointer to option string	*/
 
@@ -7102,6 +7139,8 @@ scan_omni_args(int argc, char *argv[])
       /* set the rEceive timeout */
       receive_timeout = atoi(optarg);
       break;
+    case 'E':
+      want_raw_data = 1;
     case 'g':
       /* enable SO_DEBUG, or at least make the attempt, on the data socket */
       socket_debug = 1;
